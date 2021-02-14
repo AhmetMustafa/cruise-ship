@@ -1,45 +1,54 @@
 class Ship {
-    constructor (name, captain, port){
+    constructor (name, captain, itenerary){
     this.captain = captain;
     this.name = name;
+    this.itenerary = itenerary;
     this.startingPort = true;
     this.passengers = 0;
-    this.destinationPort = null
-    this.currentPort = port
+    this.previousPort = null;
+    this.destinationPort = null;
+    this.currentPort = itenerary.ports[0];
+    itenerary.ports[0].addShip(this);
     };
 
     get isOnVoyage() {
-        if (this.destination){
+        if (this.destinationPort) {
             return true
         } else {
             return false
-        }
+        };
     };
 
     boardTheShip(passengerNumber) {
-        this.passengers += passengerNumber
+        if (!this.isOnVoyage) {
+            this.passengers += passengerNumber
+        } else {
+            throw new Error('Can not board the ship while it is travelling');
+        };
     };
 
-    arrayRemove(departure) {
-        const x = departure.dockedShips; 
-        return x.filter(function(ele) { 
-            return ele != departure; 
-        });
-    };
-
-    setSail(departure, destination) {
+    setSail(destination) {
         if (this.startingPort == true){
-        const x = this.startingPort
-        this.startingPort = !x
+        this.startingPort = false
+    };  
+        const itenerary = this.itenerary;
+        const currentPortIndex = itenerary.ports.indexOf(this.currentPort);
+        if (currentPortIndex === (itenerary.ports.length - 1)) {
+            throw new Error('End of itenerary reached');
     };
-        this.destinationPort = destination
-        return `${this.name} has set sail from ${this.currentPort} to ${destination}`
+        this.previousPort = this.currentPort;
+        this.currentPort.removeShip(this);
+        this.currentPort = null;
+        this.destinationPort = destination;
+        return `${this.name} has set sail from ${this.currentPort} to ${destination}`;
     };
 
-    dock(dockingPort) {
-        this.currentPort = dockingPort
-        this.destinationPort = null
-        dockingPort.dockedShips.push(this);
+    dock() {
+        const itenerary = this.itenerary;
+        const previousPortIndex = itenerary.ports.indexOf(this.previousPort);
+        this.currentPort = itenerary.ports[previousPortIndex + 1];
+        this.destinationPort = null;
+        this.currentPort.addShip(this);
     };
 };
 
